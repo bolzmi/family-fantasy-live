@@ -15,10 +15,9 @@
     options.disableIdleTimeout = true;
     context.start(options);
 
-    // The Cast Web Receiver renders very small, fractional vw-based text
-    // differently than desktop Chrome. Apply Cast-only, integer-pixel text
-    // sizing and a conservative font stack inside the same-origin dashboard
-    // iframe. This leaves the normal browser/AirPlay presentation untouched.
+    // Cast renders some of the dashboard's smallest text poorly. Keep the
+    // normal browser/AirPlay presentation intact, but simplify the TV receiver
+    // and use conservative integer-pixel typography for the text that remains.
     const frame = document.getElementById('dashboard');
     frame.addEventListener('load', () => {
       try {
@@ -41,38 +40,54 @@
           body.receiver #app {
             transform: none !important;
           }
-          body.receiver .team-name {
-            font-size: 16px !important;
-            font-weight: 700 !important;
-          }
-          body.receiver .team-meta,
+
+          /* On the Cast receiver, team names + scores + week progress are the
+             useful matchup-level information. Removing the tiny starter-name
+             strip avoids the one persistent Cast text-rendering problem. */
           body.receiver .starter-name,
-          body.receiver .meta-dot,
-          body.receiver .progress {
-            font-size: 11px !important;
-            font-weight: 400 !important;
-            line-height: 1.15 !important;
+          body.receiver .meta-dot {
+            display: none !important;
+          }
+          body.receiver .team-meta {
+            margin-top: 4px !important;
+            overflow: visible !important;
           }
           body.receiver .progress {
+            display: inline-block !important;
+            margin: 0 !important;
+            padding: 2px 7px !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            line-height: 1.1 !important;
+          }
+          body.receiver .team-name {
+            font-size: 17px !important;
             font-weight: 700 !important;
           }
-          body.receiver .summary-title,
-          body.receiver .summary-label,
-          body.receiver .section-title,
-          body.receiver .eyebrow {
-            font-weight: 700 !important;
+
+          /* Give Top Starters ~20% more vertical room while keeping FPA large
+             enough for the five-level scoring feed. */
+          body.receiver .side {
+            grid-template-rows: 32% 1fr !important;
           }
-          body.receiver .summary-value {
-            font-size: 15px !important;
-            font-weight: 700 !important;
+          body.receiver .event {
+            padding-top: 10px !important;
+            padding-bottom: 10px !important;
           }
           body.receiver .event-player {
-            font-size: 25px !important;
+            font-size: 24px !important;
             font-weight: 700 !important;
           }
           body.receiver .event-detail {
             font-size: 13px !important;
             font-weight: 400 !important;
+          }
+          body.receiver .event-history {
+            margin-top: 5px !important;
+            padding-top: 4px !important;
+          }
+          body.receiver .history-row {
+            padding: 2px 0 !important;
           }
           body.receiver .history-1 { font-size: 14px !important; }
           body.receiver .history-2 { font-size: 13px !important; }
@@ -85,20 +100,45 @@
           body.receiver .history-owner {
             font-weight: 400 !important;
           }
-          body.receiver .leader-name {
-            font-size: 14px !important;
+
+          body.receiver .leaders {
+            padding-top: 9px !important;
+            padding-bottom: 8px !important;
+          }
+          body.receiver .section-title {
+            font-size: 12px !important;
             font-weight: 700 !important;
+            margin-bottom: 3px !important;
+          }
+          body.receiver .leader-row {
+            padding: 4px 0 !important;
+          }
+          body.receiver .leader-name {
+            font-size: 15px !important;
+            font-weight: 700 !important;
+            line-height: 1.05 !important;
           }
           body.receiver .nfl-team {
             font-size: 11px !important;
             font-weight: 700 !important;
           }
           body.receiver .leader-owner {
-            font-size: 10px !important;
+            font-size: 11px !important;
             font-weight: 400 !important;
+            line-height: 1 !important;
           }
           body.receiver .leader-score {
-            font-size: 17px !important;
+            font-size: 18px !important;
+            font-weight: 700 !important;
+          }
+
+          body.receiver .summary-title,
+          body.receiver .summary-label,
+          body.receiver .eyebrow {
+            font-weight: 700 !important;
+          }
+          body.receiver .summary-value {
+            font-size: 15px !important;
             font-weight: 700 !important;
           }
           body.receiver footer,
