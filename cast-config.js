@@ -1,23 +1,19 @@
 // Google Cast Custom Web Receiver application ID.
 window.BOLZ_CAST_APP_ID = '86587653';
 
-// Google TV / Android TV receivers require the Web Sender to explicitly
-// declare Android receiver compatibility. The main page initializes Cast
-// normally; this applies the compatibility flag as soon as CAF is ready.
-(function enableAndroidTvDiscovery() {
-  let attempts = 0;
-  const timer = setInterval(() => {
-    attempts += 1;
-    if (window.cast?.framework?.CastContext && window.chrome?.cast) {
-      const context = cast.framework.CastContext.getInstance();
-      context.setOptions({
-        receiverApplicationId: window.BOLZ_CAST_APP_ID,
-        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
-        androidReceiverCompatible: true
-      });
-      clearInterval(timer);
-    } else if (attempts >= 100) {
-      clearInterval(timer);
-    }
-  }, 100);
-})();
+// IMPORTANT: Google requires the Web Sender callback to exist BEFORE the
+// Cast Sender SDK is loaded. index.html loads this file immediately before
+// cast_sender.js, so initialize the receiver filter here at SDK startup.
+window.__onGCastApiAvailable = function(isAvailable) {
+  if (!isAvailable) return;
+
+  const context = cast.framework.CastContext.getInstance();
+  const options = new cast.framework.CastOptions();
+  options.receiverApplicationId = window.BOLZ_CAST_APP_ID;
+  options.autoJoinPolicy = chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED;
+  options.androidReceiverCompatible = true;
+  context.setOptions(options);
+
+  const castButton = document.getElementById('castButton');
+  if (castButton) castButton.style.display = 'block';
+};
