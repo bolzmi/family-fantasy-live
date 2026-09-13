@@ -15,14 +15,12 @@
     options.disableIdleTimeout = true;
     context.start(options);
 
-    // Cast renders some of the dashboard's smallest text poorly. Keep the
-    // normal browser/AirPlay presentation intact, but simplify the TV receiver
-    // and use conservative integer-pixel typography for the text that remains.
     const frame = document.getElementById('dashboard');
     frame.addEventListener('load', () => {
       try {
         const doc = frame.contentDocument;
         if (!doc) return;
+
         const style = doc.createElement('style');
         style.id = 'cast-text-stability';
         style.textContent = `
@@ -37,21 +35,12 @@
             letter-spacing: 0 !important;
             word-spacing: 0 !important;
           }
-          body.receiver #app {
-            transform: none !important;
-          }
+          body.receiver #app { transform: none !important; }
 
-          /* On the Cast receiver, team names + scores + week progress are the
-             useful matchup-level information. Removing the tiny starter-name
-             strip avoids the one persistent Cast text-rendering problem. */
+          /* Matchups: keep the TV view focused on team, score, and week status. */
           body.receiver .starter-name,
-          body.receiver .meta-dot {
-            display: none !important;
-          }
-          body.receiver .team-meta {
-            margin-top: 4px !important;
-            overflow: visible !important;
-          }
+          body.receiver .meta-dot { display: none !important; }
+          body.receiver .team-meta { margin-top: 4px !important; overflow: visible !important; }
           body.receiver .progress {
             display: inline-block !important;
             margin: 0 !important;
@@ -60,96 +49,81 @@
             font-weight: 700 !important;
             line-height: 1.1 !important;
           }
-          body.receiver .team-name {
-            font-size: 17px !important;
-            font-weight: 700 !important;
-          }
+          body.receiver .team-name { font-size: 17px !important; font-weight: 700 !important; }
 
-          /* Give Top Starters ~20% more vertical room while keeping FPA large
-             enough for the five-level scoring feed. */
-          body.receiver .side {
-            grid-template-rows: 32% 1fr !important;
-          }
-          body.receiver .event {
-            padding-top: 10px !important;
-            padding-bottom: 10px !important;
-          }
-          body.receiver .event-player {
-            font-size: 24px !important;
-            font-weight: 700 !important;
-          }
-          body.receiver .event-detail {
-            font-size: 13px !important;
-            font-weight: 400 !important;
-          }
-          body.receiver .event-history {
-            margin-top: 5px !important;
-            padding-top: 4px !important;
-          }
-          body.receiver .history-row {
-            padding: 2px 0 !important;
-          }
-          body.receiver .history-1 { font-size: 14px !important; }
-          body.receiver .history-2 { font-size: 13px !important; }
-          body.receiver .history-3 { font-size: 12px !important; }
-          body.receiver .history-4 { font-size: 11px !important; }
+          /* FPA only needs about 29% of the right rail; Top Starters gets the rest. */
+          body.receiver .side { grid-template-rows: 29% 1fr !important; }
+          body.receiver .event { padding: 8px 14px !important; }
+          body.receiver .event-player { font-size: 23px !important; font-weight: 700 !important; }
+          body.receiver .event-detail { font-size: 13px !important; font-weight: 400 !important; margin-top: 2px !important; }
+          body.receiver .event-history { margin-top: 4px !important; padding-top: 3px !important; }
+          body.receiver .history-row { padding: 1px 0 !important; }
+          body.receiver .history-1 { font-size: 13px !important; }
+          body.receiver .history-2 { font-size: 12px !important; }
+          body.receiver .history-3 { font-size: 11px !important; }
+          body.receiver .history-4 { font-size: 10px !important; }
           body.receiver .history-row strong,
-          body.receiver .history-points {
-            font-weight: 700 !important;
-          }
-          body.receiver .history-owner {
-            font-weight: 400 !important;
-          }
+          body.receiver .history-points { font-weight: 700 !important; }
+          body.receiver .history-owner { font-weight: 400 !important; }
 
-          body.receiver .leaders {
-            padding-top: 9px !important;
-            padding-bottom: 8px !important;
-          }
-          body.receiver .section-title {
-            font-size: 12px !important;
-            font-weight: 700 !important;
-            margin-bottom: 3px !important;
-          }
-          body.receiver .leader-row {
-            padding: 4px 0 !important;
-          }
-          body.receiver .leader-name {
-            font-size: 15px !important;
-            font-weight: 700 !important;
-            line-height: 1.05 !important;
-          }
-          body.receiver .nfl-team {
+          /* Eight readable leaders is better than ten clipped rows. */
+          body.receiver #leaders .leader-row:nth-child(n+9) { display: none !important; }
+          body.receiver .leaders { padding: 8px 12px 7px !important; }
+          body.receiver .section-title { font-size: 12px !important; font-weight: 700 !important; margin-bottom: 2px !important; }
+          body.receiver .leader-row { padding: 3px 0 !important; }
+          body.receiver .leader-name { font-size: 15px !important; font-weight: 700 !important; line-height: 1.04 !important; }
+          body.receiver .nfl-team { font-size: 11px !important; font-weight: 700 !important; }
+          body.receiver .leader-owner { font-size: 11px !important; font-weight: 400 !important; line-height: 1 !important; margin-top: 1px !important; }
+          body.receiver .leader-score { font-size: 18px !important; font-weight: 700 !important; }
+
+          /* League Pulse gets its own TV typography. Avoid fractional vw text. */
+          body.receiver .summary-slot { padding: 8px 10px !important; gap: 4px !important; }
+          body.receiver .summary-title {
             font-size: 11px !important;
             font-weight: 700 !important;
+            letter-spacing: 0 !important;
           }
-          body.receiver .leader-owner {
-            font-size: 11px !important;
-            font-weight: 400 !important;
+          body.receiver .summary-grid { gap: 7px !important; }
+          body.receiver .summary-stat { padding: 6px 7px !important; }
+          body.receiver .summary-label {
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0 !important;
             line-height: 1 !important;
-          }
-          body.receiver .leader-score {
-            font-size: 18px !important;
-            font-weight: 700 !important;
-          }
-
-          body.receiver .summary-title,
-          body.receiver .summary-label,
-          body.receiver .eyebrow {
-            font-weight: 700 !important;
+            white-space: nowrap !important;
           }
           body.receiver .summary-value {
-            font-size: 15px !important;
+            font-size: 18px !important;
             font-weight: 700 !important;
+            line-height: 1.05 !important;
+            letter-spacing: 0 !important;
+            word-spacing: 0 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
           }
+
+          body.receiver .eyebrow { font-weight: 700 !important; }
           body.receiver footer,
           body.receiver .status,
-          body.receiver .sub {
-            font-weight: 400 !important;
-          }
+          body.receiver .sub { font-weight: 400 !important; }
         `;
         doc.head.appendChild(style);
+
+        // Team names in High Score are useful in a browser but the Cast shell
+        // mangles this small mixed text. Keep the TV card to the score itself.
+        const cleanHighScore = () => {
+          const el = doc.getElementById('highScore');
+          if (!el) return;
+          const text = el.textContent || '';
+          const bullet = text.indexOf('•');
+          if (bullet !== -1) el.textContent = text.slice(0, bullet).trim();
+        };
+        cleanHighScore();
+        const observer = new MutationObserver(cleanHighScore);
+        observer.observe(doc.body, {subtree:true, childList:true, characterData:true});
       } catch (err) {
-        console.warn('Cast text stabilization could not be applied', err);
+        console.warn('Cast TV styling could not be applied', err);
       }
     });
   </script>
