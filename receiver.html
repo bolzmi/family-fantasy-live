@@ -8,12 +8,110 @@
   <script src="//www.gstatic.com/cast/sdk/libs/caf_receiver/v3/cast_receiver_framework.js"></script>
 </head>
 <body>
-  <iframe src="./?receiver=1" allow="fullscreen"></iframe>
+  <iframe id="dashboard" src="./?receiver=1" allow="fullscreen"></iframe>
   <script>
     const context = cast.framework.CastReceiverContext.getInstance();
     const options = new cast.framework.CastReceiverOptions();
     options.disableIdleTimeout = true;
     context.start(options);
+
+    // The Cast Web Receiver renders very small, fractional vw-based text
+    // differently than desktop Chrome. Apply Cast-only, integer-pixel text
+    // sizing and a conservative font stack inside the same-origin dashboard
+    // iframe. This leaves the normal browser/AirPlay presentation untouched.
+    const frame = document.getElementById('dashboard');
+    frame.addEventListener('load', () => {
+      try {
+        const doc = frame.contentDocument;
+        if (!doc) return;
+        const style = doc.createElement('style');
+        style.id = 'cast-text-stability';
+        style.textContent = `
+          html, body, #app, #app * {
+            text-rendering: auto !important;
+            font-kerning: none !important;
+            font-feature-settings: "kern" 0, "liga" 0 !important;
+          }
+          body.receiver, body.receiver * {
+            font-family: Arial, Helvetica, sans-serif !important;
+            font-stretch: normal !important;
+            letter-spacing: 0 !important;
+            word-spacing: 0 !important;
+          }
+          body.receiver #app {
+            transform: none !important;
+          }
+          body.receiver .team-name {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+          }
+          body.receiver .team-meta,
+          body.receiver .starter-name,
+          body.receiver .meta-dot,
+          body.receiver .progress {
+            font-size: 11px !important;
+            font-weight: 400 !important;
+            line-height: 1.15 !important;
+          }
+          body.receiver .progress {
+            font-weight: 700 !important;
+          }
+          body.receiver .summary-title,
+          body.receiver .summary-label,
+          body.receiver .section-title,
+          body.receiver .eyebrow {
+            font-weight: 700 !important;
+          }
+          body.receiver .summary-value {
+            font-size: 15px !important;
+            font-weight: 700 !important;
+          }
+          body.receiver .event-player {
+            font-size: 25px !important;
+            font-weight: 700 !important;
+          }
+          body.receiver .event-detail {
+            font-size: 13px !important;
+            font-weight: 400 !important;
+          }
+          body.receiver .history-1 { font-size: 14px !important; }
+          body.receiver .history-2 { font-size: 13px !important; }
+          body.receiver .history-3 { font-size: 12px !important; }
+          body.receiver .history-4 { font-size: 11px !important; }
+          body.receiver .history-row strong,
+          body.receiver .history-points {
+            font-weight: 700 !important;
+          }
+          body.receiver .history-owner {
+            font-weight: 400 !important;
+          }
+          body.receiver .leader-name {
+            font-size: 14px !important;
+            font-weight: 700 !important;
+          }
+          body.receiver .nfl-team {
+            font-size: 11px !important;
+            font-weight: 700 !important;
+          }
+          body.receiver .leader-owner {
+            font-size: 10px !important;
+            font-weight: 400 !important;
+          }
+          body.receiver .leader-score {
+            font-size: 17px !important;
+            font-weight: 700 !important;
+          }
+          body.receiver footer,
+          body.receiver .status,
+          body.receiver .sub {
+            font-weight: 400 !important;
+          }
+        `;
+        doc.head.appendChild(style);
+      } catch (err) {
+        console.warn('Cast text stabilization could not be applied', err);
+      }
+    });
   </script>
 </body>
 </html>
